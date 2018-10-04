@@ -1,0 +1,17 @@
+include stdio.h
+
+main name :string -> :int
+    // my first program in C
+    printf "Hello, World! \n"
+    
+    return 0
+
+max num1 :int num2 :int -> :int
+    result :int
+
+    if num1 > num2
+        result = num1
+    else
+        result = num2
+
+    return result
