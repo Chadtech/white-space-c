@@ -8,6 +8,7 @@ module Prelude.Extra
     , (<<)
     , debugLog
     , mapFirst
+    , mapSecond
     , mapMaybe
     , andThen
     ) where
@@ -24,7 +25,7 @@ andThen :: Monad m => (a -> m b) -> m a -> m b
 andThen f m =
     m >>= f
 
-    
+
 head :: List a -> Maybe a
 head list =
     case list of
@@ -84,3 +85,8 @@ debugLog msg toString x =
 mapFirst :: (a -> b) -> (a, c) -> (b, c)
 mapFirst f (a, b) =
     (f a, b)
+
+
+mapSecond :: (a -> b) -> (c, a) -> (c, b)
+mapSecond f (a, b) =
+    (a, f b)

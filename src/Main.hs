@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+
 module Main where
 
 
@@ -15,8 +18,9 @@ import Result (Result(Ok, Err))
 import qualified Result
 
 
+
 main :: IO ()
-main =
+main = 
     Sys.getArgs
         |> fmap toFlags
         |> andThen runFromFlags
@@ -32,25 +36,40 @@ toFlags args =
 
 runFromFlags :: Result Error Flags -> IO ()
 runFromFlags result =
-    case Result.map readWscFile result of
-        Ok reader ->
-            reader
-                |> fmap T.unpack
-                |> andThen putStrLn
+    case result of
+        Ok flags ->
+            flags
+                |> readWscFile 
+                |> andThen 
+                    (write (Flags.outputFile flags))
 
         Err error ->
-            finish (Error.throw error)
+            [ T.center 60 ' ' ""
+            , T.center 60 '=' ""
+            , T.center 60 ' ' "White Space C Transpilation Error"
+            , T.center 60 '=' ""
+            , Error.throw error
+            , T.center 60 '=' ""
+            ]
+                |> T.unlines
+                |> finish
 
 
 readWscFile :: Flags -> IO Text
 readWscFile flags =
     flags
-        |> Flags.targetFile
+        |> Flags.srcFile
         |> T.unpack
         |> Prelude.readFile
         |> fmap T.pack
 
 
+write :: Text -> Text -> IO ()
+write fn file =
+    writeFile (T.unpack fn) (T.unpack file)
+
+
 finish :: Text -> IO ()
 finish =
     putStrLn . T.unpack
+
