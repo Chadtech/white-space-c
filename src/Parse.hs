@@ -1,4 +1,4 @@
-module Parsing
+module Parse
     ( Parser
     , construct
     ) where

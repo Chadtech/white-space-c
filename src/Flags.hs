@@ -19,9 +19,9 @@ import qualified Flags.Option as Option
 import Flags.Args (Args)
 import qualified Flags.Args as Args
 import Flow
-import qualified Parsing 
-import Parsing (Parser)
-import Prelude.Extra (List, debugLog, mapMaybe)
+import qualified Parse
+import Parse (Parser)
+import Prelude.Extra (List)
 import Result (Result(Ok, Err))
 import qualified Result
 
@@ -30,7 +30,7 @@ data Flags
     = Flags 
         { srcFile :: Text 
         , deliberateOutputFile :: Maybe Text
-        }    
+        }
 
             
 fromList :: List Text -> Result Error Flags
@@ -49,7 +49,7 @@ applySrcFile :: List Text -> Parser Error Text b
 applySrcFile files ctorResult =
     case files of
         first : _ ->
-            Parsing.construct first ctorResult
+            Parse.construct first ctorResult
 
         [] ->
             Err NoSrcFile
@@ -59,13 +59,13 @@ applyOutputFile :: Args -> Parser Error (Maybe Text) b
 applyOutputFile args ctorResult =
     case Option.get "output" (Args.options args) of
         Just (KeyValue _ value) ->
-            Parsing.construct (Just value) ctorResult
+            Parse.construct (Just value) ctorResult
 
         Just (Key k) ->
             Err (MalformedOutputOption k)
 
         Nothing ->
-            Parsing.construct Nothing ctorResult
+            Parse.construct Nothing ctorResult
 
 
 outputFile :: Flags -> Text
