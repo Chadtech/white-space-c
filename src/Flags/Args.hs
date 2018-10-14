@@ -11,11 +11,11 @@ module Flags.Args
     ) where
 
 
+import Data.Function
 import Data.Text (Text)
 import qualified Data.Text as T
 import Flags.Option (Option)
 import qualified Flags.Option as Option
-import Flow
 import Prelude.Extra (List, mapSecond)
 import Result (Result(Ok, Err))
 import qualified Result
@@ -43,9 +43,9 @@ addOption option args =
 fromList :: List Text -> Result Error Args
 fromList argTxts =
     []
-        |> gatherFiles argTxts
-        |> mapSecond (gatherOptions [])
-        |> fromTuple
+        & gatherFiles argTxts
+        & mapSecond (gatherOptions [])
+        & fromTuple
 
 
 fromTuple :: (List Text, Result Error (List Option)) -> Result Error Args
@@ -56,7 +56,7 @@ fromTuple (files, optionsResult) =
                 { files = files
                 , options = options
                 }
-                |> Ok
+                & Ok
 
         Err err ->
             Err err

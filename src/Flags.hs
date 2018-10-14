@@ -11,6 +11,7 @@ module Flags
     ) where
 
 
+import Data.Function
 import Data.List as List
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -18,7 +19,6 @@ import Flags.Option (Option(Key, KeyValue))
 import qualified Flags.Option as Option
 import Flags.Args (Args)
 import qualified Flags.Args as Args
-import Flow
 import qualified Parse
 import Parse (Parser)
 import Prelude.Extra (List)
@@ -38,8 +38,8 @@ fromList argTxts =
     case Args.fromList argTxts of
         Ok args ->
             Ok Flags
-                |> applySrcFile (Args.files args)
-                |> applyOutputFile args
+                & applySrcFile (Args.files args)
+                & applyOutputFile args
         
         Err err ->
             Err (ArgsError err)
@@ -76,9 +76,9 @@ outputFile flags =
 
         Nothing ->
             flags
-                |> srcFile
-                |> removeFileExtension
-                |> addCExtension
+                & srcFile
+                & removeFileExtension
+                & addCExtension
 
 
 removeFileExtension :: Text -> Text
@@ -86,8 +86,8 @@ removeFileExtension text =
     case List.reverse (T.splitOn ".wsc" text) of
         "" : rest ->
             rest
-                |> List.reverse
-                |> T.concat
+                & List.reverse
+                & T.concat
 
         _ ->
             text
@@ -123,6 +123,6 @@ throw error =
             , "\n\nBut the option needs a value like..\n\n    \
               \--output=src/main.c\n"
             ]
-                |> T.concat
+                & T.concat
 
 

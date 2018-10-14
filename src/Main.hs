@@ -4,6 +4,7 @@
 module Main where
 
 
+import Data.Function
 import qualified Data.List as List
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -12,7 +13,6 @@ import qualified Error
 import qualified File
 import Flags (Flags)
 import qualified Flags
-import Flow
 import Prelude.Extra (List, andThen)
 import qualified System.Environment as Sys
 import Result (Result(Ok, Err))
@@ -21,17 +21,15 @@ import qualified Result
 
 main :: IO ()
 main = 
-    Sys.getArgs
-        |> fmap toFlags
-        |> andThen runFromFlags
+    (fmap toFlags Sys.getArgs)
+        >>= runFromFlags
 
 
 toFlags :: List String -> Result Error Flags
-toFlags args =
-    args
-        |> List.map T.pack
-        |> Flags.fromList
-        |> Result.mapError FlagsError 
+toFlags 
+    = Result.mapError FlagsError
+    . Flags.fromList
+    . List.map T.pack
 
 
 runFromFlags :: Result Error Flags -> IO ()
@@ -39,8 +37,8 @@ runFromFlags result =
     case result of
         Ok flags ->
             flags
-                |> readWscFile 
-                |> andThen (fromFile flags)
+                & readWscFile 
+                & andThen (fromFile flags)
 
         Err error ->
             printError error
@@ -57,11 +55,10 @@ fromFile flags fileText =
 
 
 transpile :: Text -> Result Error Text
-transpile fileText =
-    fileText
-        |> File.parse
-        |> Result.map File.write
-        |> Result.mapError FileError
+transpile 
+    = Result.mapError FileError
+    . Result.map File.write
+    . File.parse
             
 
 printError :: Error -> IO ()
@@ -73,18 +70,17 @@ printError error =
     , Error.throw error
     , T.center 60 '=' ""
     ]
-        |> T.unlines
-        |> T.unpack
-        |> putStrLn
+        & T.unlines
+        & T.unpack
+        & putStrLn
 
 
 readWscFile :: Flags -> IO Text
-readWscFile flags =
-    flags
-        |> Flags.srcFile
-        |> T.unpack
-        |> Prelude.readFile
-        |> fmap T.pack
+readWscFile 
+    = fmap T.pack
+    . Prelude.readFile
+    . T.unpack
+    . Flags.srcFile
 
 
 write :: Text -> Text -> IO ()

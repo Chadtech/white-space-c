@@ -9,12 +9,12 @@ module File
     ) where
 
 
+import Data.Function
 import Data.List as List
 import Data.List.Index as LI
 import Data.Text (Text)
 import qualified Data.Text as T
-import Flow
-import Prelude.Extra (List, debugLog)
+import Prelude.Extra (List)
 import Result (Result(Ok, Err))
 import qualified Result
 
@@ -24,12 +24,11 @@ data Canonical
 
 
 parse :: Text -> Result Error (List Canonical)
-parse text =
-    text
-        |> T.lines
-        |> List.map T.stripEnd
-        |> LI.indexed
-        |> toCanonicals
+parse 
+    = toCanonicals
+    . LI.indexed
+    . List.map T.stripEnd
+    . T.lines
 
 
 toCanonicals :: List (Int, Text) -> Result Error (List Canonical)
@@ -85,7 +84,7 @@ lineToCanonical allLines (index, line) rest =
                 , linesAfterThisLine = rest
                 }
     in
-    case T.words (debugLog "LINE" T.unpack line) of
+    case T.words line of
         "include" : remainingWords ->
             parseInclude context remainingWords
 
@@ -103,22 +102,22 @@ parseInclude :: Context ->  List Text -> Result Error (Maybe Canonical, List (In
 parseInclude context wordsAfterInclude =
     case wordsAfterInclude of
         includeFile : [] ->
-            ( Just <| Include includeFile
+            ( Just $ Include includeFile
             , linesAfterThisLine context
             )
-                |> Ok
+                & Ok
 
         _ ->
             context
-                |> IncludeHasTooManyWords
-                |> Err
+                & IncludeHasTooManyWords
+                & Err
 
 
 write :: List Canonical -> Text
 write canonicals =
     canonicals
-        |> List.map writeCanonical 
-        |> T.concat
+        & List.map writeCanonical 
+        & T.concat
 
 
 writeCanonical :: Canonical -> Text
@@ -129,7 +128,7 @@ writeCanonical canonical =
             , importFile
             , ">\n"
             ]
-                |> T.concat
+                & T.concat
 
 
 -- ERROR --
@@ -144,9 +143,9 @@ throw error =
     case error of
         IncludeHasTooManyWords context ->
             [ context 
-                |> thisIndex
-                |> show
-                |> T.pack
+                & thisIndex
+                & show
+                & T.pack
             , "|"
             , thisLine context
             , "\n          "
@@ -154,4 +153,4 @@ throw error =
                 (T.length (thisLine context) - 8)
                 "^"
             ]
-                |> T.concat
+                & T.concat

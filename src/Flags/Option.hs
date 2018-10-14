@@ -10,10 +10,10 @@ module Flags.Option
     ) where
 
 
+import Data.Function
 import Data.List as List
 import Data.Text (Text)
 import qualified Data.Text as T
-import Flow
 import Prelude.Extra (List, mapMaybe)
 import Result (Result(Ok, Err))
 import qualified Result
@@ -79,4 +79,4 @@ throw error =
             , "Or this..\n\n     "
             , "--key\n"
             ]
-                |> T.concat
+                & T.concat
